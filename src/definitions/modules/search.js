@@ -163,6 +163,7 @@ $.fn.search = function(parameters) {
                 result  = $result.data(metadata.result) || module.get.result(value, results),
                 returnedValue
               ;
+              console.log(result);
               if( $.isFunction(settings.onSelect) ) {
                 if(settings.onSelect.call(element, result, results) === false) {
                   module.debug('Custom onSelect callback cancelled default select action');
@@ -343,6 +344,7 @@ $.fn.search = function(parameters) {
               module.debug('Finding result that matches', value);
               $.each(results, function(index, category) {
                 if($.isArray(category.results)) {
+                  console.log(value, category.results, lookupFields);
                   result = module.search.object(value, category.results, lookupFields)[0];
                   // dont continue searching if a result is found
                   if(result) {
@@ -633,14 +635,22 @@ $.fn.search = function(parameters) {
         create: {
           id: function(resultIndex, categoryIndex) {
             var
-              firstLetterCharCode = 97,
-              categoryID = (categoryIndex !== undefined)
-                ? String.fromCharCode(firstLetterCharCode + categoryIndex)
-                : '',
-              resultID   = resultIndex,
-              id         = categoryID + resultID
+              resultID      = (resultIndex + 1), // not zero indexed
+              categoryID    = (categoryIndex + 1),
+              firstCharCode,
+              characterID,
+              id
             ;
-            module.verbose('Creating unique id', id);
+            if(categoryIndex !== undefined) {
+              // start char code for "A"
+              characterID = String.fromCharCode(95 + categoryIndex);
+              id          = categoryID + resultID;
+              module.verbose('Creating category result id', id);
+            }
+            else {
+              id = resultID;
+              module.verbose('Creating result id', id);
+            }
             return id;
           },
           results: function() {
@@ -654,12 +664,10 @@ $.fn.search = function(parameters) {
         },
 
         inject: {
-          result: function(result, resultID, categoryID) {
+          result: function(result, resultIndex, categoryIndex) {
             module.verbose('Injecting result into results');
             var
-              resultIndex     = (resultID - 1),
-              categoryIndex   = (categoryID - 1),
-              $selectedResult = (categoryID !== undefined)
+              $selectedResult = (categoryIndex !== undefined)
                 ? $results
                     .children().eq(categoryIndex)
                       .children().eq(resultIndex)
@@ -675,12 +683,12 @@ $.fn.search = function(parameters) {
             module.debug('Injecting unique ids into results');
             var
               // since results may be object, we must use counters
-              categoryIndex = 1,
-              resultIndex   = 1
+              categoryIndex = 0,
+              resultIndex   = 0
             ;
             if(settings.type === 'category') {
               // iterate through each category result
-              resultIndex = 1;
+              resultIndex = 0;
               $.each(results, function(index, category) {
                 $.each(category.results, function(index, value) {
                   var
