@@ -163,7 +163,6 @@ $.fn.search = function(parameters) {
                 result  = $result.data(metadata.result) || module.get.result(value, results),
                 returnedValue
               ;
-              console.log(result);
               if( $.isFunction(settings.onSelect) ) {
                 if(settings.onSelect.call(element, result, results) === false) {
                   module.debug('Custom onSelect callback cancelled default select action');
@@ -344,7 +343,6 @@ $.fn.search = function(parameters) {
               module.debug('Finding result that matches', value);
               $.each(results, function(index, category) {
                 if($.isArray(category.results)) {
-                  console.log(value, category.results, lookupFields);
                   result = module.search.object(value, category.results, lookupFields)[0];
                   // dont continue searching if a result is found
                   if(result) {
@@ -638,13 +636,13 @@ $.fn.search = function(parameters) {
               resultID      = (resultIndex + 1), // not zero indexed
               categoryID    = (categoryIndex + 1),
               firstCharCode,
-              characterID,
+              letterID,
               id
             ;
             if(categoryIndex !== undefined) {
               // start char code for "A"
-              characterID = String.fromCharCode(95 + categoryIndex);
-              id          = categoryID + resultID;
+              letterID = String.fromCharCode(97 + categoryIndex);
+              id          = letterID + resultID;
               module.verbose('Creating category result id', id);
             }
             else {
@@ -670,9 +668,9 @@ $.fn.search = function(parameters) {
               $selectedResult = (categoryIndex !== undefined)
                 ? $results
                     .children().eq(categoryIndex)
-                      .children().eq(resultIndex)
+                      .children(selector.result).eq(resultIndex)
                 : $results
-                    .children().eq(resultIndex)
+                    .children(selector.result).eq(resultIndex)
             ;
             module.verbose('Injecting results metadata', $selectedResult);
             $selectedResult
@@ -688,8 +686,8 @@ $.fn.search = function(parameters) {
             ;
             if(settings.type === 'category') {
               // iterate through each category result
-              resultIndex = 0;
               $.each(results, function(index, category) {
+                resultIndex = 0;
                 $.each(category.results, function(index, value) {
                   var
                     result = category.results[index]
